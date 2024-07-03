@@ -55,7 +55,6 @@ class Snake:
             pygame.K_DOWN: pygame.image.load("assets/Graphics/tail_up.png")
         }
         self.head_surface = self.head_surfaces[self.direction]
-        self.tail_surface = self.tail_surfaces[self.direction]
 
     def move(self):
         head_x, head_y = self.body[0]
@@ -119,6 +118,23 @@ class Snake:
                 else:
                     return self.body_surfaces["horizontal"]
 
+    def get_tail_surface(self):
+        if len(self.body) < 2:
+            return self.tail_surfaces[self.direction]
+
+        tail_segment = self.body[-1]
+        previous_segment = self.body[-2]
+
+        if previous_segment[0] == tail_segment[0] and previous_segment[1] < tail_segment[1]:
+            return self.tail_surfaces[pygame.K_UP]
+        elif previous_segment[0] == tail_segment[0] and previous_segment[1] > tail_segment[1]:
+            return self.tail_surfaces[pygame.K_DOWN]
+        elif previous_segment[1] == tail_segment[1] and previous_segment[0] < tail_segment[0]:
+            return self.tail_surfaces[pygame.K_LEFT]
+        elif previous_segment[1] == tail_segment[1] and previous_segment[0] > tail_segment[0]:
+            return self.tail_surfaces[pygame.K_RIGHT]
+        else:
+            return self.tail_surfaces[self.direction]
 
 # Food class
 class Food:
@@ -169,11 +185,14 @@ def main():
         pygame.draw.rect(screen, grass_color, pygame.Rect(60, 60, 680, 480))
 
         for index, segment in enumerate(snake.body):
-            surface = snake.get_body_surface(index)
+            if index == len(snake.body) - 1:
+                surface = snake.get_tail_surface()
+            else:
+                surface = snake.get_body_surface(index)
             screen.blit(surface, segment)
 
         screen.blit(apple_surface, food.position)
-        screen.blit(text.surface, (330, 10))
+        screen.blit(text.surface, (330, 30))
 
         pygame.display.update()
         clock.tick(6)
